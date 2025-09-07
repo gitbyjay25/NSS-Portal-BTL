@@ -1,0 +1,18 @@
+# Cursor Configuration for NSS Portal
+
+## CSS and Tailwind CSS
+- Recognize @tailwind directives as valid CSS
+- Accept @keyframes as valid CSS at-rules
+- Allow rgba() color functions
+- Accept modern CSS syntax
+
+## File Associations
+*.css = tailwindcss
+
+## Linting Rules
+- Disable CSS validation warnings for Tailwind directives
+- Accept modern CSS properties and values
+- Allow alpha values in colors (rgba, rgb with alpha)
+- Accept kebab-case and camelCase in keyframes
+- Allow duplicate selectors when needed
+- Accept shorthand and longhand properties

@@ -1,0 +1,69 @@
+# NSS Portal - Quick Setup Guide
+# Copy these commands to install everything quickly
+
+# ================================================================================
+# STEP 1: INSTALL NODE.JS
+# ================================================================================
+# Download from: https://nodejs.org/
+# Choose LTS version (recommended)
+# Verify installation: node --version
+
+# ================================================================================
+# STEP 2: INSTALL MONGODB
+# ================================================================================
+# Download from: https://www.mongodb.com/try/download/community
+# Follow installation guide for your OS
+# Start MongoDB: mongod
+
+# ================================================================================
+# STEP 3: CLONE & SETUP PROJECT
+# ================================================================================
+# git clone <repository-url>
+# cd nss-portal
+
+# ================================================================================
+# STEP 4: INSTALL DEPENDENCIES
+# ================================================================================
+# Backend dependencies
+npm install
+
+# Frontend dependencies
+cd client
+npm install
+cd ..
+
+# ================================================================================
+# STEP 5: CREATE ENVIRONMENT FILE
+# ================================================================================
+# Create .env file in root directory:
+# MONGODB_URI=mongodb://localhost:27017/nss-portal
+# JWT_SECRET=your-secret-key-here
+# JWT_EXPIRE=7d
+# PORT=5002
+
+# ================================================================================
+# STEP 6: START APPLICATION
+# ================================================================================
+# Start both frontend and backend
+npm run start:all
+
+# OR start separately:
+# Backend only: npm start
+# Frontend only: npm run client
+
+# ================================================================================
+# ACCESS POINTS
+# ================================================================================
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:5002/api
+# Database: mongodb://localhost:27017/nss-portal
+
+# ================================================================================
+# TROUBLESHOOTING
+# ================================================================================
+# 1. Port conflicts: Change PORT in .env file
+# 2. MongoDB issues: Ensure MongoDB is running
+# 3. Node.js issues: Use version 14.x or higher
+# 4. Permission issues: Run terminal as administrator
+
+# ================================================================================

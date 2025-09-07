@@ -1,0 +1,53 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "variants",
+          "responsive",
+          "screen",
+          "layer",
+          "keyframes",
+          "media",
+          "supports",
+          "import",
+          "charset",
+          "namespace",
+          "page",
+          "font-face",
+          "viewport",
+          "counter-style",
+          "swash",
+          "ornaments",
+          "annotation",
+          "property",
+          "color-profile",
+          "font-feature-values",
+          "font-palette-values"
+        ]
+      }
+    ],
+    "no-descending-specificity": null,
+    "selector-pseudo-element-no-unknown": [
+      true,
+      {
+        "ignorePseudoElements": ["v-deep"]
+      }
+    ],
+    "alpha-value-notation": null,
+    "color-function-notation": null,
+    "color-function-alias-notation": null,
+    "font-family-name-quotes": null,
+    "declaration-block-no-redundant-longhand-properties": null,
+    "keyframes-name-pattern": null,
+    "length-zero-no-unit": null,
+    "rule-empty-line-before": null,
+    "no-duplicate-selectors": null,
+    "declaration-block-single-line-max-declarations": null,
+    "value-keyword-case": null
+  }
+}

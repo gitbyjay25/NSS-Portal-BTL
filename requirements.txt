@@ -1,0 +1,150 @@
+# NSS Portal - Technology Stack Requirements
+# This file contains all the technologies and packages used in the project
+
+# ================================================================================
+# BACKEND REQUIREMENTS (Node.js)
+# ================================================================================
+
+# Core Dependencies
+express@4.18.2
+mongoose@7.5.0
+cors@2.8.5
+helmet@7.0.0
+express-rate-limit@6.10.0
+express-validator@7.0.1
+jsonwebtoken@9.0.2
+bcryptjs@2.4.3
+dotenv@16.3.1
+multer@1.4.5-lts.1
+nodemailer@6.9.4
+
+# Development Dependencies
+nodemon@3.0.1
+concurrently@8.2.2
+cross-env@10.0.0
+
+# ================================================================================
+# FRONTEND REQUIREMENTS (React.js)
+# ================================================================================
+
+# Core Dependencies
+react@18.2.0
+react-dom@18.2.0
+react-router-dom@6.8.1
+react-scripts@5.0.1
+axios@1.3.4
+react-query@3.39.3
+react-hook-form@7.43.5
+react-toastify@9.1.3
+
+# UI & Styling
+tailwindcss@3.4.17
+autoprefixer@10.4.21
+postcss@8.5.6
+framer-motion@10.0.1
+lucide-react@0.263.1
+react-icons@4.8.0
+clsx@1.2.1
+date-fns@2.29.3
+
+# Development Dependencies
+@testing-library/jest-dom@5.16.4
+@testing-library/react@13.3.0
+@testing-library/user-event@13.5.0
+http-proxy-middleware@3.0.5
+stylelint@16.23.1
+stylelint-config-standard@39.0.0
+
+# ================================================================================
+# DATABASE REQUIREMENTS
+# ================================================================================
+
+# MongoDB (Install separately)
+# Download from: https://www.mongodb.com/try/download/community
+# Version: 4.4 or higher
+
+# MongoDB Compass (GUI Tool)
+# Download from: https://www.mongodb.com/products/compass
+
+# ================================================================================
+# DEVELOPMENT ENVIRONMENT REQUIREMENTS
+# ================================================================================
+
+# Node.js
+# Version: 14.x or higher
+# Download from: https://nodejs.org/
+
+# npm (comes with Node.js)
+# Version: 6.x or higher
+
+# Git
+# Download from: https://git-scm.com/
+
+# Code Editor (Recommended)
+# Visual Studio Code
+# Download from: https://code.visualstudio.com/
+
+
+
+
+
+# ================================================================================
+# PROJECT STRUCTURE
+# ================================================================================
+
+# nss-portal/
+# ├── client/                 # React frontend
+# │   ├── public/            # Static files
+# │   ├── src/               # Source code
+# │   │   ├── components/    # Reusable components
+# │   │   ├── contexts/      # React contexts
+# │   │   ├── pages/         # Page components
+# │   │   └── App.js         # Main app component
+# │   └── package.json
+# ├── models/                 # MongoDB schemas
+# ├── routes/                 # API routes
+# ├── middleware/             # Custom middleware
+# ├── server.js              # Main server file
+# └── package.json
+
+# ================================================================================
+# USEFUL COMMANDS
+# ================================================================================
+
+# Backend Commands:
+# npm start                  # Start production server
+# npm run dev               # Start development server
+# npm run client            # Start frontend only
+# npm run start:all         # Start both frontend and backend
+
+# Frontend Commands:
+# cd client
+# npm start                 # Start React development server
+# npm run build             # Build for production
+# npm test                  # Run tests
+
+# Database Commands:
+# mongod                    # Start MongoDB server
+# mongo                     # Open MongoDB shell
+
+# ================================================================================
+# CONTACT & SUPPORT
+# ================================================================================
+
+# For technical support:
+# - Project Lead: [Your Name]
+# - Technical Lead: [Technical Lead Name]
+# - Email: [Project Email]
+# - GitHub: [Repository Link]
+
+# ================================================================================
+# VERSION INFORMATION
+# ================================================================================
+
+# Project Version: 1.0.0
+# Last Updated: [Current Date]
+# Node.js Version: 14.x+
+# React Version: 18.2.0
+# MongoDB Version: 4.4+
+
+# ================================================================================

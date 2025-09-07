@@ -1,0 +1,47 @@
+{
+  "name": "nss-portal",
+  "version": "1.0.0",
+  "description": "NSS Unit Web Portal - Volunteer Management and Event Coordination",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "client": "cd client && npm start",
+    "server": "nodemon server.js",
+    "dev:full": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "cd client && npm run build",
+    "install:all": "npm install && cd client && npm install",
+    "start:both": "start-servers.bat",
+    "start:all": "echo Starting NSS Portal Servers... && echo WiFi Access: http://10.193.17.97:3000 && echo Local Access: http://localhost:3000 && concurrently \"npm start\" \"npm run client\""
+  },
+  "keywords": [
+    "nss",
+    "volunteer",
+    "portal",
+    "social-service",
+    "events"
+  ],
+  "author": "NSS Team",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.10.0",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.4"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.0.0",
+    "nodemon": "^3.0.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.12"
+  }
+}
