@@ -150,8 +150,8 @@ The application will automatically create the necessary collections when it star
 use nss-portal
 db.users.insertOne({
   name: "Admin User",
-  email: "admin@nss.com",
-  password: "$2a$10$...", // Hashed password
+  email: "abc.com",
+  password: "6$28#0...", // Hashed password
   role: "admin",
   isApproved: true,
   isActive: true,
