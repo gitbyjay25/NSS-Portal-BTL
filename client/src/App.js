@@ -35,6 +35,7 @@ import AdminGallery from './pages/admin/Gallery';
 import AdminTeams from './pages/admin/Teams';
 import AdminAnnouncements from './pages/admin/Announcements';
 import Announcements from './pages/Announcements';
+import Cells from './pages/Cells';
 
 import AdminAttendance from './pages/admin/Attendance';
 import AttendanceAnalytics from './pages/admin/AttendanceAnalytics';
@@ -64,6 +65,7 @@ function App() {
                 <Route path="/events/:id" element={<EventDetail />} />
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/teams" element={<Teams />} />
+                <Route path="/cells" element={<Cells />} />
                 <Route path="/volunteer/register" element={<VolunteerRegister />} />
                 <Route path="/volunteer/login" element={<VolunteerLogin />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
