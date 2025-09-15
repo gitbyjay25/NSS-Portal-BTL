@@ -3,13 +3,37 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const initialState = {
-  user: null,
-  token: null, // Don't initialize with localStorage here
-  isAuthenticated: false,
-  loading: true,
-  error: null
+// Check localStorage immediately to prevent redirect flicker
+const getInitialState = () => {
+  const savedToken = localStorage.getItem('token');
+  const savedUserRaw = localStorage.getItem('user');
+  let savedUser = null;
+  try {
+    savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
+  } catch (e) {
+    localStorage.removeItem('user');
+  }
+  
+  if (savedToken && savedUser) {
+    return {
+      user: savedUser,
+      token: savedToken,
+      isAuthenticated: true,
+      loading: true, // Still loading to verify with backend
+      error: null
+    };
+  }
+  
+  return {
+    user: null,
+    token: null,
+    isAuthenticated: false,
+    loading: true,
+    error: null
+  };
 };
+
+const initialState = getInitialState();
 
 const authReducer = (state, action) => {
   switch (action.type) {
@@ -76,30 +100,43 @@ export const AuthProvider = ({ children }) => {
 
   // Initialize token from localStorage and check auth on mount
   useEffect(() => {
+    const sleep = (ms) => new Promise(res => setTimeout(res, ms));
     const initializeAuth = async () => {
       const savedToken = localStorage.getItem('token');
+      const savedUserRaw = localStorage.getItem('user');
+      const savedUser = (() => { try { return savedUserRaw ? JSON.parse(savedUserRaw) : null; } catch(_) { return null; }})();
       
       if (savedToken) {
-        // Set the token first
+        // Setting  the token first
         axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+
         
-        try {
-          // Verify the token is still valid
-          const response = await axios.get('/api/auth/me');
-          if (response.data.success) {
-            dispatch({
-              type: 'AUTH_SUCCESS',
-              payload: { user: response.data.user, token: savedToken }
-            });
-          } else {
-            // Token is invalid, remove it
-            localStorage.removeItem('token');
-            delete axios.defaults.headers.common['Authorization'];
-            dispatch({ type: 'INIT_AUTH_FAIL', payload: 'Token invalid' });
+        // Retry /me a few times before failing, to survive slow backend
+        let attempt = 0;
+        let success = false;
+        while (attempt < 3 && !success) {
+          try {
+            // Verify the token is still valid
+            const response = await axios.get('/api/auth/me');
+            if (response.data.success) {
+              const freshUser = response.data.user;
+              localStorage.setItem('user', JSON.stringify(freshUser));
+              dispatch({ type: 'AUTH_SUCCESS', payload: { user: freshUser, token: savedToken } });
+              success = true;
+              break;
+            }
+          } catch (error) {
+            attempt += 1;
+            if (attempt < 3) {
+              await sleep(500 * attempt);
+            }
           }
-        } catch (error) {
-          // Token verification failed, remove it
+        }
+
+        // If still not successful, mark fail
+        if (!success) {
           localStorage.removeItem('token');
+          localStorage.removeItem('user');
           delete axios.defaults.headers.common['Authorization'];
           dispatch({ type: 'INIT_AUTH_FAIL', payload: 'Authentication failed' });
         }
@@ -127,11 +164,20 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
       if (response.data.success) {
+        // Persist token immediately to avoid losing auth on fast redirects/reloads
+        const newToken = response.data.token;
+        if (newToken) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+          localStorage.setItem('token', newToken);
+        }
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
         dispatch({
           type: 'AUTH_SUCCESS',
           payload: response.data
         });
-        return { success: true, user: response.data.user };
+        return { success: true, user: response.data.user, token: newToken };
       } else {
         dispatch({ type: 'AUTH_FAIL', payload: response.data.message });
         return { success: false, message: response.data.message };
@@ -166,6 +212,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     dispatch({ type: 'LOGOUT' });
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   const updateUser = (userData) => {

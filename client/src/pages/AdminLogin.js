@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Shield, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,7 +12,9 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  const redirectTo = location.state?.from?.pathname || '/admin/dashboard';
 
   const handleChange = (e) => {
     setFormData({
@@ -36,7 +38,7 @@ const AdminLogin = () => {
       if (result.success) {
         if (result.user.role === 'admin') {
           toast.success('Admin login successful!');
-          navigate('/admin/dashboard');
+          navigate(redirectTo, { replace: true });
         } else {
           toast.error('Access denied. Admin privileges required.');
         }

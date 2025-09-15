@@ -450,6 +450,15 @@ const AdminDashboard = () => {
             </Link>
 
             <Link
+              to="/admin/leadership"
+              className="flex flex-col items-center p-6 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors text-center"
+            >
+              <Users className="h-8 w-8 text-indigo-600 mb-3" />
+              <span className="font-medium text-indigo-900">Manage Leadership</span>
+              <span className="text-sm text-indigo-700 mt-1">Add roles by year</span>
+            </Link>
+
+            <Link
               to="/admin/attendance"
               className="flex flex-col items-center p-6 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors text-center"
             >

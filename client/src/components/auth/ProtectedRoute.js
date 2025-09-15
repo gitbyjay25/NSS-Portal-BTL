@@ -6,6 +6,7 @@ const ProtectedRoute = ({ children, role }) => {
   const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
 
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -16,6 +17,7 @@ const ProtectedRoute = ({ children, role }) => {
       </div>
     );
   }
+
 
   if (!isAuthenticated) {
     // Redirect to appropriate login based on the route being accessed

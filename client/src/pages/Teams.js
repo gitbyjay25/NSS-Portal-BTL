@@ -27,6 +27,8 @@ const Teams = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [error, setError] = useState(null);
   const [activeTeam, setActiveTeam] = useState(0);
+  const [activeView, setActiveView] = useState('teams'); // 'teams' | 'leadership'
+  const [selectedLeadershipYear, setSelectedLeadershipYear] = useState('2023-24');
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [editingTeam, setEditingTeam] = useState(null);
@@ -131,6 +133,24 @@ const Teams = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  // Leadership derived dynamically from Teams where name follows "Leadership <year>"
+  const leadershipTeams = teams.filter((t) => /^(Leadership)\s+\d{4}-\d{2}/i.test(t.name || ''));
+  const leadershipYears = leadershipTeams
+    .map((t) => {
+      const match = (t.name || '').match(/\b(\d{4}-\d{2})\b/);
+      return match ? match[1] : null;
+    })
+    .filter(Boolean);
+
+  useEffect(() => {
+    if (leadershipYears.length > 0) {
+      // If current selection not in available years, set to first
+      if (!selectedLeadershipYear || !leadershipYears.includes(selectedLeadershipYear)) {
+        setSelectedLeadershipYear(leadershipYears[0]);
+      }
+    }
+  }, [teams]);
 
   // Admin Functions
   const handleEditMember = (teamIndex, memberIndex) => {
@@ -297,7 +317,7 @@ const Teams = () => {
         </div>
       </div>
 
-      {/* Team Navigation */}
+      {/* Team / Leadership Section */}
       <section className="py-8 sm:py-12 md:py-16 relative">
         {/* Section Background - Enhanced with gradient and effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-blue-50/60 to-purple-50/60 backdrop-blur-md rounded-2xl sm:rounded-3xl mx-2 sm:mx-4 shadow-2xl border border-white/40 relative overflow-hidden">
@@ -313,79 +333,96 @@ const Teams = () => {
         </div>
         
         <div className="relative max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          {/* View Toggle - minimal controls */}
+          <div className="flex justify-center gap-3 mb-6">
+            <button
+              onClick={() => setActiveView('teams')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold ${activeView === 'teams' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border'}`}
+            >
+              Teams
+            </button>
+            <button
+              onClick={() => setActiveView('leadership')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold ${activeView === 'leadership' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 border'}`}
+            >
+              Leadership
+            </button>
+          </div>
           
-          {/* Loading State */}
-          {loading && (
-            <div className="text-center py-12">
-              <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-              <p className="text-gray-600">Loading teams...</p>
-            </div>
-          )}
+          {activeView === 'teams' && (
+            <>
+              {/* Loading State */}
+              {loading && (
+                <div className="text-center py-12">
+                  <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+                  <p className="text-gray-600">Loading teams...</p>
+                </div>
+              )}
 
-          {/* Error State */}
-          {error && !loading && (
-            <div className="text-center py-12">
-              <p className="text-red-600 mb-4">Error: {error}</p>
-              <button 
-                onClick={fetchTeams}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-
-          {/* Team Tabs */}
-          {!loading && !error && teams.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-12 relative">
-              {/* Tabs background enhancement */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-2xl -m-2"></div>
-              {teams.map((team, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveTeam(index)}
-                  className={`px-3 sm:px-6 py-2 sm:py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 relative overflow-hidden text-sm sm:text-base ${
-                    activeTeam === index
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                      : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md border border-gray-200/50'
-                  }`}
-                >
-                  {/* Button decorative elements */}
-                  {activeTeam === index && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                  )}
-                  <span className="relative z-10">{team.name}</span>
-                </button>
-              ))}
-              
-              {/* Admin Add Member Button */}
-              {isAdmin && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowAddMemberForm(true)}
-                    className="px-6 py-3 rounded-full font-semibold bg-green-600 text-white hover:bg-green-700 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
-                  >
-                    <UserPlus className="w-5 h-5" />
-                    Add Member
-                  </button>
-                  <button
+              {/* Error State */}
+              {error && !loading && (
+                <div className="text-center py-12">
+                  <p className="text-red-600 mb-4">Error: {error}</p>
+                  <button 
                     onClick={fetchTeams}
-                    className="px-6 py-3 rounded-full font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    🔄 Refresh Data
+                    Try Again
                   </button>
                 </div>
               )}
-            </div>
-          )}
+
+              {/* Team Tabs */}
+              {!loading && !error && teams.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-12 relative">
+                  {/* Tabs background enhancement */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-2xl -m-2"></div>
+                  {teams.map((team, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveTeam(index)}
+                      className={`px-3 sm:px-6 py-2 sm:py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 relative overflow-hidden text-sm sm:text-base ${
+                        activeTeam === index
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
+                          : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md border border-gray-200/50'
+                      }`}
+                    >
+                      {/* Button decorative elements */}
+                      {activeTeam === index && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                      )}
+                      <span className="relative z-10">{team.name}</span>
+                    </button>
+                  ))}
+                  
+                  {/* Admin Add Member Button */}
+                  {isAdmin && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowAddMemberForm(true)}
+                        className="px-6 py-3 rounded-full font-semibold bg-green-600 text-white hover:bg-green-700 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                      >
+                        <UserPlus className="w-5 h-5" />
+                        Add Member
+                      </button>
+                      <button
+                        onClick={fetchTeams}
+                        className="px-6 py-3 rounded-full font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                      >
+                        🔄 Refresh Data
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
           
-          {/* Team Members Grid */}
-          {!loading && !error && teams.length > 0 && teams[activeTeam] && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
-              {/* Grid background enhancement */}
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-blue-50/20 to-purple-50/20 rounded-2xl -m-4"></div>
-              {teams[activeTeam].members && teams[activeTeam].members.map((member, index) => (
-                <div key={index} className="group relative">
+              {/* Team Members Grid */}
+              {!loading && !error && teams.length > 0 && teams[activeTeam] && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
+                  {/* Grid background enhancement */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-blue-50/20 to-purple-50/20 rounded-2xl -m-4"></div>
+                  {teams[activeTeam].members && teams[activeTeam].members.map((member, index) => (
+                    <div key={index} className="group relative">
                   {/* Admin Controls */}
                   {isAdmin && (
                     <div className="absolute top-4 right-4 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -490,9 +527,79 @@ const Teams = () => {
                     
                     {/* Bottom Decoration */}
                     <div className="h-1 bg-gradient-to-r from-blue-400 to-purple-400"></div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+            </>
+          )}
+
+          {activeView === 'leadership' && (
+            <div className="relative">
+              {/* Year selector */}
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8">
+                {leadershipYears.length > 0 ? (
+                  leadershipYears.map((year) => (
+                    <button
+                      key={year}
+                      onClick={() => setSelectedLeadershipYear(year)}
+                      className={`px-4 py-2 rounded-full text-sm font-semibold ${selectedLeadershipYear === year ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 border'}`}
+                    >
+                      {year}
+                    </button>
+                  ))
+                ) : (
+                  <span className="text-sm text-gray-600">No leadership data found. Create a team named like "Leadership 2023-24" in Admin & add members.</span>
+                )}
+              </div>
+              {/* Roles list */}
+              {(() => {
+                // Find leadership team for selected year
+                const currentTeam = leadershipTeams.find((t) => (t.name || '').includes(selectedLeadershipYear));
+                if (currentTeam) {
+                  const members = currentTeam.members || [];
+                  return (
+                    <div className="max-w-3xl mx-auto">
+                      <ul className="divide-y divide-gray-200 bg-white/80 rounded-lg border">
+                        {members.map((m, idx) => (
+                          <li key={idx} className="flex items-center justify-between px-4 py-3">
+                            <span className="font-medium text-gray-800 mr-4">{m.role || 'Role'}</span>
+                            <div className="flex items-center gap-3 ml-auto">
+                              <img
+                                src={m.photo || '/Am.jpg'}
+                                alt={m.name}
+                                className="w-10 h-10 rounded-full object-cover border"
+                                onError={(e) => { e.target.src = '/Am.jpg'; }}
+                              />
+                              <div className="text-right">
+                                <div className="text-gray-800 font-semibold leading-tight">{m.name}</div>
+                                {m.department ? (
+                                  <div className="text-xs text-gray-500">{m.department}</div>
+                                ) : null}
+                              </div>
+                              {m.socialLinks?.linkedin ? (
+                                <a
+                                  href={m.socialLinks.linkedin}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-blue-600 hover:text-blue-700"
+                                  title="LinkedIn"
+                                >
+                                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                  </svg>
+                                </a>
+                              ) : null}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           )}
 

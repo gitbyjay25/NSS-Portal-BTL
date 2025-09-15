@@ -371,7 +371,7 @@ const Home = () => {
 
   const galleryHighlights = [
     { id: 1, image: "/grp.jpg", caption: "Community Service" },
-    { id: 2, image: "/IMG-20250410-WA0016.jpg", caption: "Team Building" },
+    { id: 2, image: "/ag.heic", caption: "Team Building" },
     { id: 3, image: "/grp.jpg", caption: "Environmental Care" },
     { id: 4, image: "/IMG-20250410-WA0016.jpg", caption: "Health Awareness" }
   ];

@@ -42,9 +42,11 @@ import AttendanceAnalytics from './pages/admin/AttendanceAnalytics';
 import ChangePassword from './pages/admin/ChangePassword';
 import AdminProfile from './pages/admin/Profile';
 import AdminFeedback from './pages/admin/Feedback';
+import AdminLeadership from './pages/admin/Leaderboard';
 
 // Protected Route Component
 import ProtectedRoute from './components/auth/ProtectedRoute';
+
 
 // Create a client
 const queryClient = new QueryClient();
@@ -176,6 +178,14 @@ function App() {
                   element={
                     <ProtectedRoute role="admin">
                       <AdminAnnouncements />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/leadership" 
+                  element={
+                    <ProtectedRoute role="admin">
+                      <AdminLeadership />
                     </ProtectedRoute>
                   } 
                 />
