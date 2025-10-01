@@ -145,7 +145,7 @@ const About = () => {
   return (
     <>
       <style>{customStyles}</style>
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20">
       {/* Hero Section */}
         <section className="relative bg-cover bg-center bg-no-repeat text-white py-20 overflow-hidden" style={{
           backgroundImage: `url('/cholliyar.jpg')`

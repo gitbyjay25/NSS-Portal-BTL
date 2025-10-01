@@ -80,7 +80,6 @@ const ChangePassword = () => {
         toast.error(data.message || 'Failed to change password');
       }
     } catch (error) {
-      console.error('Error changing password:', error);
       toast.error('Failed to change password');
     } finally {
       setLoading(false);

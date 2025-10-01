@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import logger from '../utils/logger';
 import errorHandler from '../utils/errorHandler';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Users } from 'lucide-react';
 
 // Feedback Card Component
 const FeedbackCard = ({ feedback }) => {
@@ -908,6 +908,33 @@ const Home = () => {
           </section>
 
 
+
+             {/* Leadership Section */}
+       <section className="relative bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-20">
+         <div className="max-w-7xl mx-auto px-6">
+           {/* Section Header */}
+           <div className="text-center mb-16">
+             <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
+               <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
+               <span className="text-sm font-medium text-purple-700">Our Leaders</span>
+               <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
+             </div>
+             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+               Meet Our Leadership Team
+             </h2>
+             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+               Discover the dedicated leaders who guide our NSS unit and inspire positive change in our community.
+             </p>
+             <Link
+               to="/leadership"
+               className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+             >
+               <Users className="h-5 w-5 mr-2" />
+               View All Leaders
+             </Link>
+           </div>
+         </div>
+       </section>
 
              {/* Our Core Services Section - Beautiful & Engaging */}
        <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-20">

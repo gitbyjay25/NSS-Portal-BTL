@@ -124,6 +124,14 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/nss-porta
     console.error('  ❌ Error loading /api/attendance route:', error.message);
   }
 
+  try {
+    console.log('  📍 Loading /api/leaders route...');
+    app.use('/api/leaders', require('./routes/leaders'));
+    console.log('  ✅ /api/leaders route loaded successfully');
+  } catch (error) {
+    console.error('  ❌ Error loading /api/leaders route:', error.message);
+  }
+
   // Add a test route for /api
   app.get('/api', (req, res) => {
     res.json({
@@ -137,7 +145,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/nss-porta
         '/api/admin',
         '/api/announcements',
         '/api/teams',
-        '/api/attendance'
+        '/api/attendance',
+        '/api/leaders'
       ]
     });
   });

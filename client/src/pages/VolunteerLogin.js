@@ -62,7 +62,6 @@ const VolunteerLogin = () => {
         toast.error(result.message || 'Login failed');
       }
     } catch (error) {
-      console.error('Login error:', error);
       toast.error('An error occurred during login');
     } finally {
       setIsSubmitting(false);

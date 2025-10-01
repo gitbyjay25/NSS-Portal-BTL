@@ -527,7 +527,7 @@ const VolunteerDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen py-8 relative overflow-hidden">
+    <div className="min-h-screen py-8 relative overflow-hidden pt-16 sm:pt-20">
 
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 depth-layer">

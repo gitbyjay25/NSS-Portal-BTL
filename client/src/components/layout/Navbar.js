@@ -135,7 +135,7 @@ const Navbar = () => {
             </div>
           </div>
           
-                    {/* Right Side - Navigation Links - Hidden on mobile */}
+          {/* Right Side - Navigation Links - Hidden on mobile */}
           <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
             <Link to="/" className={`text-white ${isActive('/') ? 'border-b-2 border-white pb-1' : ''} font-medium`}>
               Home
@@ -214,7 +214,7 @@ const Navbar = () => {
                   onClick={() => setIsOpen(!isOpen)}
                   className="flex items-center space-x-2 text-white hover:text-gray-300 focus:outline-none"
                 >
-                                      <img
+                  <img
                       className="h-8 w-8 rounded-full border-2 border-white/20"
                       src={user?.profilePicture?.startsWith('/') ? `http://localhost:5002${user.profilePicture}` : (user?.profilePicture || 'https://via.placeholder.com/32x32')}
                       alt="Profile"
@@ -342,7 +342,7 @@ const Navbar = () => {
             {isAuthenticated && (
               <div className="bg-white/10 rounded-lg p-3 mb-4">
                 <div className="flex items-center space-x-3">
-                                      <img
+                  <img
                       className="h-10 w-10 rounded-full border-2 border-white/20"
                       src={user?.profilePicture?.startsWith('/') ? `http://localhost:5002${user.profilePicture}` : (user?.profilePicture || 'https://via.placeholder.com/40x40')}
                       alt="Profile"

@@ -17,9 +17,30 @@ import {
   User,
   UserCircle,
   Users2,
-  UserX
+  UserX,
+  Calendar,
+  GraduationCap,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
+
+const ROLE_PRIORITY = [
+  'Head',
+  'Vice Head',
+  'Plantation Head',
+  'DISHA',
+  'CLP',
+  'Content Writing',
+  'Social Media',
+  'Photography/Videography'
+];
+const backendBase = 'http://localhost:5002';
+const resolveImage = (src) => {
+  if (!src) return '';
+  if (src.startsWith('/uploads')) return `${backendBase}${src}`;
+  return src;
+};
 
 const Teams = () => {
   const [teams, setTeams] = useState([]);
@@ -29,6 +50,7 @@ const Teams = () => {
   const [activeTeam, setActiveTeam] = useState(0);
   const [activeView, setActiveView] = useState('teams'); // 'teams' | 'leadership'
   const [selectedLeadershipYear, setSelectedLeadershipYear] = useState('2023-24');
+  const [selectedRole, setSelectedRole] = useState('all'); // 'all' | 'Head' | 'Vice Head' | etc.
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [editingTeam, setEditingTeam] = useState(null);
@@ -45,10 +67,43 @@ const Teams = () => {
     socialLinks: { instagram: '', linkedin: '' }
   });
 
+  // Leadership (new API) state
+  const [leaders, setLeaders] = useState([]);
+  const [leaderBatches, setLeaderBatches] = useState([]);
+  const [leadersLoading, setLeadersLoading] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState('');
+
   useEffect(() => {
     fetchTeams();
     checkAdminStatus();
   }, []);
+
+  // Load leaders when switching to leadership tab first time
+  useEffect(() => {
+    if (activeView === 'leadership' && leaderBatches.length === 0 && !leadersLoading) {
+      loadLeadershipData();
+    }
+  }, [activeView]);
+
+  const loadLeadershipData = async () => {
+    try {
+      setLeadersLoading(true);
+      const [leadersRes, batchesRes] = await Promise.all([
+        fetch('/api/leaders?active=true'),
+        fetch('/api/leaders/batches')
+      ]);
+      const leadersJson = await leadersRes.json();
+      const batchesJson = await batchesRes.json();
+      const batchesSorted = (batchesJson.batches || []).sort((a, b) => b.localeCompare(a));
+      setLeaders(leadersJson.leaders || []);
+      setLeaderBatches(batchesSorted);
+      if (batchesSorted.length > 0) setSelectedBatch(batchesSorted[0]);
+    } catch (e) {
+      // silent fail; show empty
+    } finally {
+      setLeadersLoading(false);
+    }
+  };
 
   // Show scroll to top button when user scrolls down
   useEffect(() => {
@@ -152,6 +207,50 @@ const Teams = () => {
     }
   }, [teams]);
 
+  // Sort leaders by role priority
+  const sortLeaders = (list) => {
+    return [...list].sort((a, b) => {
+      const ai = ROLE_PRIORITY.findIndex(r => r.toLowerCase() === (a.role || '').toLowerCase());
+      const bi = ROLE_PRIORITY.findIndex(r => r.toLowerCase() === (b.role || '').toLowerCase());
+      const ap = ai === -1 ? Number.MAX_SAFE_INTEGER : ai;
+      const bp = bi === -1 ? Number.MAX_SAFE_INTEGER : bi;
+      if (ap !== bp) return ap - bp;
+      if (typeof a.order === 'number' && typeof b.order === 'number') return a.order - b.order;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  };
+
+  // Filter leaders by selected role
+  const getFilteredLeaders = () => {
+    let filtered = leaders.filter(l => !selectedBatch || l.nssLeadershipYear === selectedBatch);
+    if (selectedRole !== 'all') {
+      filtered = filtered.filter(l => l.role && l.role.toLowerCase() === selectedRole.toLowerCase());
+    }
+    return sortLeaders(filtered);
+  };
+
+  // Filter team members by selected role
+  const getFilteredTeamMembers = () => {
+    if (!teams[activeTeam] || !teams[activeTeam].members) return [];
+    let filtered = teams[activeTeam].members;
+    if (selectedRole !== 'all') {
+      filtered = filtered.filter(member => member.role && member.role.toLowerCase() === selectedRole.toLowerCase());
+    }
+    return filtered.sort((a, b) => {
+      const ai = ROLE_PRIORITY.findIndex(r => r.toLowerCase() === (a.role || '').toLowerCase());
+      const bi = ROLE_PRIORITY.findIndex(r => r.toLowerCase() === (b.role || '').toLowerCase());
+      const ap = ai === -1 ? Number.MAX_SAFE_INTEGER : ai;
+      const bp = bi === -1 ? Number.MAX_SAFE_INTEGER : bi;
+      return ap - bp;
+    });
+  };
+
+  const scrollContainerId = 'leaders-scroll-in-teams';
+  const scrollBy = (delta) => {
+    const el = document.getElementById(scrollContainerId);
+    if (el) el.scrollBy({ left: delta, behavior: 'smooth' });
+  };
+
   // Admin Functions
   const handleEditMember = (teamIndex, memberIndex) => {
     setEditingMember({ teamIndex, memberIndex, ...teams[teamIndex].members[memberIndex] });
@@ -176,7 +275,6 @@ const Teams = () => {
       const teamToUpdate = teams[editingMember.teamIndex];
       
       if (!teamToUpdate._id) {
-        console.error('No _id found in team:', teamToUpdate);
         throw new Error('Team ID not found. Please refresh the page and try again.');
       }
 
@@ -246,7 +344,6 @@ const Teams = () => {
       const teamToUpdate = teams[activeTeam];
       
       if (!teamToUpdate._id) {
-        console.error('No _id found in team:', teamToUpdate);
         throw new Error('Team ID not found. Please refresh the page and try again.');
       }
 
@@ -282,7 +379,7 @@ const Teams = () => {
   };
 
   return (
-    <div className="relative overflow-hidden min-h-screen">
+    <div className="relative overflow-hidden min-h-screen pt-16 sm:pt-20">
       {/* Background Design - Same as header section */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50"></div>
       
@@ -377,23 +474,27 @@ const Teams = () => {
                 <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-12 relative">
                   {/* Tabs background enhancement */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-2xl -m-2"></div>
-                  {teams.map((team, index) => (
+                  {teams.filter(team => !/^\d{4}-\d{2}$/.test(team.name)).map((team, index) => {
+                    // Find the original index for this team
+                    const originalIndex = teams.findIndex(t => t._id === team._id);
+                    return (
                     <button
                       key={index}
-                      onClick={() => setActiveTeam(index)}
+                      onClick={() => setActiveTeam(originalIndex)}
                       className={`px-3 sm:px-6 py-2 sm:py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 relative overflow-hidden text-sm sm:text-base ${
-                        activeTeam === index
+                        activeTeam === originalIndex
                           ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
                           : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md border border-gray-200/50'
                       }`}
                     >
                       {/* Button decorative elements */}
-                      {activeTeam === index && (
+                      {activeTeam === originalIndex && (
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
                       )}
                       <span className="relative z-10">{team.name}</span>
                     </button>
-                  ))}
+                    );
+                  })}
                   
                   {/* Admin Add Member Button */}
                   {isAdmin && (
@@ -405,17 +506,11 @@ const Teams = () => {
                         <UserPlus className="w-5 h-5" />
                         Add Member
                       </button>
-                      <button
-                        onClick={fetchTeams}
-                        className="px-6 py-3 rounded-full font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
-                      >
-                        🔄 Refresh Data
-                      </button>
                     </div>
                   )}
                 </div>
               )}
-          
+
               {/* Team Members Grid */}
               {!loading && !error && teams.length > 0 && teams[activeTeam] && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
@@ -537,69 +632,117 @@ const Teams = () => {
 
           {activeView === 'leadership' && (
             <div className="relative">
-              {/* Year selector */}
-              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8">
-                {leadershipYears.length > 0 ? (
-                  leadershipYears.map((year) => (
+              {/* Batch selector using leaders API */}
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6">
+                {leadersLoading ? (
+                  <span className="text-sm text-gray-600">Loading leadership…</span>
+                ) : leaderBatches.length > 0 ? (
+                  leaderBatches.map((batch) => (
                     <button
-                      key={year}
-                      onClick={() => setSelectedLeadershipYear(year)}
-                      className={`px-4 py-2 rounded-full text-sm font-semibold ${selectedLeadershipYear === year ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 border'}`}
+                      key={batch}
+                      onClick={() => setSelectedBatch(batch)}
+                      className={`px-4 py-2 rounded-full text-sm font-semibold ${selectedBatch === batch ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 border'}`}
                     >
-                      {year}
+                      {batch}
                     </button>
                   ))
                 ) : (
-                  <span className="text-sm text-gray-600">No leadership data found. Create a team named like "Leadership 2023-24" in Admin & add members.</span>
+                  <span className="text-sm text-gray-600">No leadership data found. Ask admin to add leaders.</span>
                 )}
               </div>
-              {/* Roles list */}
-              {(() => {
-                // Find leadership team for selected year
-                const currentTeam = leadershipTeams.find((t) => (t.name || '').includes(selectedLeadershipYear));
-                if (currentTeam) {
-                  const members = currentTeam.members || [];
-                  return (
-                    <div className="max-w-3xl mx-auto">
-                      <ul className="divide-y divide-gray-200 bg-white/80 rounded-lg border">
-                        {members.map((m, idx) => (
-                          <li key={idx} className="flex items-center justify-between px-4 py-3">
-                            <span className="font-medium text-gray-800 mr-4">{m.role || 'Role'}</span>
-                            <div className="flex items-center gap-3 ml-auto">
-                              <img
-                                src={m.photo || '/Am.jpg'}
-                                alt={m.name}
-                                className="w-10 h-10 rounded-full object-cover border"
-                                onError={(e) => { e.target.src = '/Am.jpg'; }}
-                              />
-                              <div className="text-right">
-                                <div className="text-gray-800 font-semibold leading-tight">{m.name}</div>
-                                {m.department ? (
-                                  <div className="text-xs text-gray-500">{m.department}</div>
-                                ) : null}
-                              </div>
-                              {m.socialLinks?.linkedin ? (
-                                <a
-                                  href={m.socialLinks.linkedin}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-blue-600 hover:text-blue-700"
-                                  title="LinkedIn"
-                                >
-                                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                                  </svg>
-                                </a>
-                              ) : null}
+
+              {/* Role Filter Buttons for Leadership */}
+              {!leadersLoading && leaderBatches.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                  <button
+                    onClick={() => setSelectedRole('all')}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                      selectedRole === 'all' 
+                        ? 'bg-purple-600 text-white shadow-lg' 
+                        : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    All Roles
+                  </button>
+                  {ROLE_PRIORITY.map((role) => (
+                    <button
+                      key={role}
+                      onClick={() => setSelectedRole(role)}
+                      className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                        selectedRole === role 
+                          ? 'bg-purple-600 text-white shadow-lg' 
+                          : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Horizontal scroll of leaders */}
+              <div className="relative">
+                <button
+                  aria-label="Scroll left"
+                  onClick={() => scrollBy(-400)}
+                  className="hidden md:flex items-center justify-center absolute -left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow border hover:bg-gray-50"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-700" />
+                </button>
+                <div id={scrollContainerId} className="overflow-x-auto no-scrollbar">
+                  <div className="flex gap-4 pr-4">
+                    {getFilteredLeaders().map((leader) => (
+                      <div key={leader._id} className="min-w-[260px] max-w-[260px] bg-white rounded-xl border border-gray-200 shadow-sm">
+                        <div className="p-5">
+                          <div className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium mb-4">
+                            {leader.role}
+                          </div>
+                          <div className="flex items-center justify-center mb-4">
+                            <div className="w-20 h-20 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-white">
+                              {leader.profilePicture && leader.profilePicture !== '/default-avatar.svg' ? (
+                                <img src={resolveImage(leader.profilePicture)} alt={leader.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <User className="h-10 w-10 text-gray-600" />
+                              )}
                             </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900 text-center mb-1">{leader.name}</h3>
+                          <div className="text-center text-sm text-gray-600 mb-1 flex items-center justify-center gap-2">
+                            <GraduationCap className="w-4 h-4" /> {leader.course}
+                          </div>
+                          <div className="text-center text-xs text-gray-500 mb-3 flex items-center justify-center gap-2">
+                            <Calendar className="w-4 h-4" /> Academic: {leader.academicBatch}
+                          </div>
+                          {leader.linkedinProfile && (
+                            <div className="text-center">
+                              <a href={leader.linkedinProfile} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                Connect
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                        <div className="px-5 py-3 bg-gray-50 text-[11px] text-gray-600 flex items-center justify-between">
+                          <span>NSS {leader.nssLeadershipYear}</span>
+                          {typeof leader.order === 'number' && <span>Priority {leader.order}</span>}
+                        </div>
+                      </div>
+                    ))}
+                    {leadersLoading && (
+                      <div className="w-full py-16 text-center text-gray-500">Loading…</div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  aria-label="Scroll right"
+                  onClick={() => scrollBy(400)}
+                  className="hidden md:flex items-center justify-center absolute -right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow border hover:bg-gray-50"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
+
+              <div className="mt-8 text-center text-sm text-gray-500">Scroll horizontally to view more leaders.</div>
             </div>
           )}
 
@@ -648,12 +791,14 @@ const Teams = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           required
                         >
+                          <option value="">Select Course</option>
                           <option value="B.Tech">B.Tech</option>
                           <option value="BCA">BCA</option>
                           <option value="BBA">BBA</option>
                           <option value="B.Com">B.Com</option>
                           <option value="Nursing">Nursing</option>
                           <option value="Pharmacy">Pharmacy</option>
+                          <option value="Other">Other</option>
                         </select>
                       </div>
                       <div>
@@ -761,7 +906,7 @@ const Teams = () => {
                             ...editingMember, 
                             socialLinks: { ...editingMember.socialLinks, linkedin: e.target.value }
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
                           placeholder="https://linkedin.com/in/username"
                         />
                       </div>
@@ -841,6 +986,7 @@ const Teams = () => {
                           <option value="B.Com">B.Com</option>
                           <option value="Nursing">Nursing</option>
                           <option value="Pharmacy">Pharmacy</option>
+                          <option value="Other">Other</option>
                         </select>
                       </div>
                       <div>
@@ -948,7 +1094,7 @@ const Teams = () => {
                             ...newMember, 
                             socialLinks: { ...newMember.socialLinks, linkedin: e.target.value }
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
                           placeholder="https://linkedin.com/in/username"
                         />
                       </div>
