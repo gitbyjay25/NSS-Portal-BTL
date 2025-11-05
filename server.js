@@ -5,6 +5,14 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const logger = require('./utils/logger');
 require('dotenv').config();
+process.on('uncaughtException', err => {
+  console.error('🔥 Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', err => {
+  console.error('🔥 Unhandled Rejection:', err);
+});
+
 
 const app = express();
 
