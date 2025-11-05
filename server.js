@@ -171,6 +171,20 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/nss-porta
 
   console.log('🔧 All routes loaded. Starting server...');
   
+// ------------------ Serve React Frontend in Production ------------------
+const path = require("path");
+
+if (process.env.NODE_ENV === "production") {
+  // Serve the static files from React build folder
+  app.use(express.static(path.join(__dirname, "client", "build")));
+
+  // Handle React routing, return index.html for all non-API routes
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "build", "index.html"));
+  });
+}
+
+
   // Start server after routes are loaded
   const PORT = process.env.PORT || 5002;
   const HOST = '0.0.0.0'; // Listen on all network interfaces
