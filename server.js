@@ -194,7 +194,7 @@ if (process.env.NODE_ENV === "production") {
 
 
   // Start server after routes are loaded
-  const PORT = process.env.PORT || 5002;
+  const PORT = process.env.PORT;
   const HOST = '0.0.0.0'; // Listen on all network interfaces
   app.listen(PORT, HOST, () => {
     console.log(`🚀 NSS Portal Server running on port ${PORT}`);
